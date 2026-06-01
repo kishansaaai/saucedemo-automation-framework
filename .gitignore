@@ -6,3 +6,4 @@ screenshots/*.png
 node_modules/
 .pytest_cache/
 *.egg-info/
+
