@@ -87,3 +87,4 @@ class BasePage:
         path = f"screenshots/{name}_{int(time.time())}.png"
         self.driver.save_screenshot(path)
         return path
+
