@@ -26,3 +26,4 @@ class LoginPage(BasePage):
 
     def has_error(self):
         return self.is_visible(self.ERROR_MESSAGE, timeout=4)
+
