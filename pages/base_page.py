@@ -88,3 +88,4 @@ class BasePage:
         self.driver.save_screenshot(path)
         return path
 
+
