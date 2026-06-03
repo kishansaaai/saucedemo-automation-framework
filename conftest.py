@@ -96,3 +96,4 @@ def pytest_runtest_makereport(item, call):
             except Exception as exc:  # noqa: BLE001 - best-effort screenshot
                 print(f"Could not capture screenshot: {exc}")
 
+
