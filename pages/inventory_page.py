@@ -53,3 +53,4 @@ class InventoryPage(BasePage):
     def logout(self):
         self.click(self.MENU_BUTTON)
         self.click(self.LOGOUT_LINK)
+
