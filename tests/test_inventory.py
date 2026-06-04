@@ -73,3 +73,4 @@ def test_inventory_shows_all_six_products(driver):
     names = inventory_page.get_all_item_names()
     assert len(names) == 6
 
+
