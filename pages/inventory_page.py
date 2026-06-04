@@ -55,3 +55,4 @@ class InventoryPage(BasePage):
         self.click(self.LOGOUT_LINK)
 
 
+
