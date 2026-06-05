@@ -96,3 +96,4 @@ def test_removing_nonexistent_cart_does_not_error(driver):
     inventory_page.go_to_cart()
     cart_page = CartPage(driver)
     assert cart_page.get_item_count() == 0
+
