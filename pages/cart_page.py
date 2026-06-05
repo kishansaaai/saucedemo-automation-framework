@@ -27,3 +27,4 @@ class CartPage(BasePage):
     def continue_shopping(self):
         self.click(self.CONTINUE_SHOPPING_BUTTON)
 
+
