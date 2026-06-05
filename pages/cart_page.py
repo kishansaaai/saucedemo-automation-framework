@@ -28,3 +28,4 @@ class CartPage(BasePage):
         self.click(self.CONTINUE_SHOPPING_BUTTON)
 
 
+
