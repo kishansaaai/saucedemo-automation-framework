@@ -89,3 +89,4 @@ class CheckoutPage(BasePage):
 
     def get_complete_header_text(self):
         return self.get_text(self.COMPLETE_HEADER)
+
