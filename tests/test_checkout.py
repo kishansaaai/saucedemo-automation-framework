@@ -98,3 +98,4 @@ def test_checkout_can_be_cancelled_from_overview(driver):
     inventory_page = InventoryPage(driver)
     assert inventory_page.is_loaded()
     assert inventory_page.get_cart_count() == 1, "Cart should still hold the item after cancelling checkout"
+
