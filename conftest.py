@@ -97,3 +97,4 @@ def pytest_runtest_makereport(item, call):
                 print(f"Could not capture screenshot: {exc}")
 
 
+
