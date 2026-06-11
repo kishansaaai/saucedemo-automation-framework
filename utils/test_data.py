@@ -37,3 +37,4 @@ CHECKOUT_INFO = {
     "last_name": "Doe",
     "postal_code": "94107",
 }
+
