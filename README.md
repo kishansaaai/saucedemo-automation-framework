@@ -157,3 +157,4 @@ The framework utilizes `pytest-html` to generate comprehensive test reports.
 This repository includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that automatically runs the entire test suite on every push and pull request to the `main` branch. 
 - The CI pipeline executes the tests on an `ubuntu-latest` runner using Headless Chrome.
 - Test reports and failure screenshots are automatically uploaded as pipeline artifacts for review.
+
