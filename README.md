@@ -158,3 +158,4 @@ This repository includes a GitHub Actions workflow (`.github/workflows/ci.yml`) 
 - The CI pipeline executes the tests on an `ubuntu-latest` runner using Headless Chrome.
 - Test reports and failure screenshots are automatically uploaded as pipeline artifacts for review.
 
+
