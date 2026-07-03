@@ -1,0 +1,71 @@
+name: SauceDemo E2E Suite
+
+# Why run on every push AND pull_request:
+#   - push: catch regressions the moment they land on any branch.
+#   - pull_request: block merges before a broken change reaches main.
+# Why headless in CI:
+#   - GitHub Actions runners have no display server (no X11/Xvfb by default
+#     for a GUI browser session), and headless Chrome is faster and cheaper
+#     to run at scale than a full rendered browser -- there's nobody to look
+#     at the screen in a CI job. The `driver` fixture defaults to headless
+#     for this reason; --no-headless is only used for local debugging.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Run test suite (headless) with HTML report
+        run: |
+          mkdir -p reports screenshots
+          pytest --headless \
+                 --html=reports/report.html \
+                 --self-contained-html \
+                 -n auto
+
+      # Reports/screenshots are uploaded regardless of pass/fail so a failed
+      # build's evidence is never lost -- this is what makes the pipeline
+      # actually debuggable instead of just red/green.
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-html-report
+          path: reports/report.html
+          retention-days: 14
+
+      - name: Upload failure screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots
+          path: screenshots/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      # The default `pytest` exit code is non-zero on any test failure,
+      # which GitHub Actions treats as a failed step -> failed job -> a red
+      # X on the commit/PR. No extra "fail the build" logic is needed beyond
+      # NOT swallowing that exit code (e.g. never do `pytest || true`).

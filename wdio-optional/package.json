@@ -1,0 +1,16 @@
+{
+  "name": "saucedemo-wdio-optional",
+  "version": "1.0.0",
+  "description": "Optional secondary JS/WebdriverIO layer mirroring the core Python/Selenium/Pytest suite, demonstrating cross-stack POM portability.",
+  "scripts": {
+    "test": "wdio run wdio.conf.js"
+  },
+  "devDependencies": {
+    "@wdio/cli": "^8.39.0",
+    "@wdio/local-runner": "^8.39.0",
+    "@wdio/mocha-framework": "^8.39.0",
+    "@wdio/spec-reporter": "^8.39.0",
+    "@wdio/selenium-standalone-service": "^8.39.0",
+    "chromedriver": "^126.0.0"
+  }
+}
