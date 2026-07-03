@@ -16,6 +16,12 @@ on:
     branches: [main]
   workflow_dispatch: {}
 
+# Required for GitHub Pages deployment
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   e2e-tests:
     runs-on: ubuntu-latest
@@ -48,7 +54,7 @@ jobs:
       # Reports/screenshots are uploaded regardless of pass/fail so a failed
       # build's evidence is never lost -- this is what makes the pipeline
       # actually debuggable instead of just red/green.
-      - name: Upload HTML report
+      - name: Upload HTML report as artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -64,6 +70,19 @@ jobs:
           path: screenshots/
           retention-days: 14
           if-no-files-found: ignore
+
+      # Publish the HTML report to GitHub Pages (gh-pages branch)
+      # This gives a permanent, shareable URL for the latest test report.
+      # Only runs on pushes to main so PRs don't overwrite the live report.
+      - name: Deploy report to GitHub Pages
+        if: always() && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./reports
+          publish_branch: gh-pages
+          destination_dir: .
+          commit_message: "ci: publish test report for ${{ github.sha }}"
 
       # The default `pytest` exit code is non-zero on any test failure,
       # which GitHub Actions treats as a failed step -> failed job -> a red

@@ -1,5 +1,9 @@
 # SauceDemo Automation Framework
 
+![CI Status](https://github.com/kishansaaai/saucedemo-automation-framework/actions/workflows/ci.yml/badge.svg)
+
+**Live Test Report:** [https://kishansaaai.github.io/saucedemo-automation-framework/report.html](https://kishansaaai.github.io/saucedemo-automation-framework/report.html)
+
 A production-grade, fully-featured UI automation framework built with Python, Selenium WebDriver, and Pytest. This repository serves as a comprehensive test suite designed to validate the core e-commerce workflows of [SauceDemo (Swag Labs)](https://www.saucedemo.com/). 
 
 The framework is engineered with a strict focus on reliability in headless CI/CD environments, clean architecture through the Page Object Model (POM), and high maintainability.
