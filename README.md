@@ -1,60 +1,98 @@
 # SauceDemo Automation Framework
 
-A robust, fully-featured UI automation framework built with Python, Selenium, and Pytest. This framework is designed to test the e-commerce flows of [SauceDemo (Swag Labs)](https://www.saucedemo.com/) with a focus on reliability in headless environments, clean architecture, and maintainability.
+A production-grade, fully-featured UI automation framework built with Python, Selenium WebDriver, and Pytest. This repository serves as a comprehensive test suite designed to validate the core e-commerce workflows of [SauceDemo (Swag Labs)](https://www.saucedemo.com/). 
 
-## Features
+The framework is engineered with a strict focus on reliability in headless CI/CD environments, clean architecture through the Page Object Model (POM), and high maintainability.
 
-- **Page Object Model (POM):** Clean separation of UI locators/actions from test logic.
-- **Robust Headless Execution:** Custom workarounds for known headless Chrome issues (e.g., JavaScript-based element clicking and React synthetic event triggers) to ensure 100% reliability in CI/CD pipelines.
-- **Data-Driven Testing:** Uses `pytest.mark.parametrize` to run tests across multiple user personas (Standard, Problem, Performance Glitch).
-- **Automated HTML Reporting:** Generates self-contained HTML reports with embedded screenshots for failed tests.
-- **Parallel Execution Ready:** Designed with function-scoped WebDriver fixtures, making it fully compatible with `pytest-xdist` for parallel test execution without state leakage.
-- **Graceful Failure Handling:** Expected failures (like hardcoded SauceDemo bugs for the `problem_user`) are explicitly marked using `pytest.mark.xfail`.
+## Table of Contents
+- [Architecture & Design Patterns](#architecture--design-patterns)
+- [Handling Headless Chrome Flakiness](#handling-headless-chrome-flakiness)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Installation & Setup](#installation--setup)
+- [Test Execution Guide](#test-execution-guide)
+- [Test Reports](#test-reports)
+- [Continuous Integration](#continuous-integration)
 
-## Technology Stack
+---
 
-- **Language:** Python 3.12+
-- **Browser Automation:** Selenium WebDriver
-- **Testing Framework:** Pytest
-- **Reporting:** pytest-html
-- **WebDriver Management:** webdriver-manager (automatically downloads and manages ChromeDriver)
+## Architecture & Design Patterns
+
+### Page Object Model (POM)
+The framework strictly adheres to the Page Object Model design pattern. All UI locators and interactions are encapsulated within dedicated page classes (`pages/`). Test files (`tests/`) contain zero Selenium locators or WebDriver calls. This ensures that if the UI changes, updates are made in a single location, preventing brittle and high-maintenance test scripts.
+
+### Pytest Fixtures & State Management
+WebDriver lifecycle management is handled via Pytest fixtures in `conftest.py`. We use a `function` scoped driver fixture. This guarantees a completely pristine browser state (clean cookies, local storage, and session data) for every individual test. This deliberate design choice eliminates state leakage between tests and makes the suite inherently safe for parallel execution.
+
+### Data-Driven Testing
+The framework leverages `pytest.mark.parametrize` extensively. For instance, the core checkout flow is validated across multiple user personas (Standard User, Problem User, Performance Glitch User) using a single, parameterized test function. This maximizes test coverage while minimizing code duplication.
+
+### Expected Failures
+SauceDemo intentionally includes bugs for specific personas (e.g., the `problem_user` cannot update their Last Name in the checkout form). Instead of avoiding these, the framework tests them and marks them explicitly using `pytest.mark.xfail(strict=False)`. This documents known application bugs directly in the test suite without failing the CI pipeline.
+
+---
+
+## Handling Headless Chrome Flakiness
+
+One of the major engineering challenges in modern UI automation is the unreliability of headless browsers when interacting with React-based applications on certain operating systems (like Windows). This framework implements robust, battle-tested workarounds:
+
+1. **JavaScript Clicks:** Standard WebDriver `element.click()` can be silently dropped by headless Chrome. To guarantee absolute stability, all button clicks in this framework are executed natively via the browser engine using `driver.execute_script("arguments[0].click();", element)`.
+2. **React Synthetic Event Setters:** Headless Chrome frequently drops individual keystrokes when using `send_keys()`. To solve this, the framework uses a custom JavaScript setter that directly accesses the React component's value descriptor and dispatches native `input` and `change` events. This ensures 100% reliability when populating forms, bypassing WebDriver entirely for text input.
+
+---
 
 ## Project Structure
 
 ```text
 saucedemo-framework/
 ├── pages/                  # Page Object classes (UI interaction logic)
-│   ├── base_page.py        # Core Selenium wrapper methods (waits, clicks, etc.)
-│   ├── login_page.py
-│   ├── inventory_page.py
-│   ├── cart_page.py
-│   └── checkout_page.py
+│   ├── base_page.py        # Core Selenium wrapper (waits, JS clicks, JS typing)
+│   ├── login_page.py       # Login screen interactions
+│   ├── inventory_page.py   # Product listing and sorting
+│   ├── cart_page.py        # Cart management
+│   └── checkout_page.py    # Multi-step checkout wizard
 ├── tests/                  # Pytest test files (Business logic and assertions)
-│   ├── test_login.py
-│   ├── test_inventory.py
-│   ├── test_cart.py
-│   └── test_checkout.py
+│   ├── test_login.py       # Authentication validation
+│   ├── test_inventory.py   # Product listing validation
+│   ├── test_cart.py        # Cart state persistence tests
+│   └── test_checkout.py    # End-to-End purchase flows and validation checks
 ├── utils/                  # Test data and utility functions
-│   └── test_data.py
-├── reports/                # Generated test reports
+│   └── test_data.py        # Centralized constants, credentials, and test payloads
+├── reports/                # Generated test reports (HTML)
 ├── screenshots/            # Failure screenshots (auto-captured on test failure)
 ├── conftest.py             # Pytest fixtures and hooks (WebDriver setup, teardown, reporting)
-├── pytest.ini              # Pytest configuration
+├── pytest.ini              # Pytest configuration and CLI defaults
 └── requirements.txt        # Project dependencies
 ```
+
+---
+
+## Prerequisites
+
+Ensure you have the following installed on your local machine:
+- **Python:** Version 3.12 or higher.
+- **Git:** For version control.
+- **Google Chrome:** The framework uses `webdriver-manager` to automatically download the ChromeDriver matching your installed Chrome version.
+
+---
 
 ## Installation & Setup
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/saucedemo-automation-framework.git
+   git clone https://github.com/kishansaaai/saucedemo-automation-framework.git
    cd saucedemo-automation-framework
    ```
 
-2. **Create a virtual environment (Recommended):**
+2. **Create and activate a virtual environment (Recommended):**
    ```bash
+   # On Windows
    python -m venv venv
-   source venv/Scripts/activate  # On Windows
+   source venv/Scripts/activate
+   
+   # On macOS/Linux
+   python3 -m venv venv
+   source venv/bin/activate
    ```
 
 3. **Install dependencies:**
@@ -62,43 +100,56 @@ saucedemo-framework/
    pip install -r requirements.txt
    ```
 
-## Running the Tests
+---
 
-To run the entire test suite and generate an HTML report:
+## Test Execution Guide
 
+The framework is highly configurable via the Pytest CLI.
+
+### Standard Execution (Headless + HTML Report)
+Run the entire test suite in headless mode (default) and generate a detailed HTML report:
 ```bash
 pytest -v --html=reports/report.html --self-contained-html
 ```
 
-### Running specific tests:
+### Visible Browser Execution (Headed Mode)
+To watch the tests execute in a visible Chrome window, pass the custom `--no-headless` flag:
+```bash
+pytest --no-headless -v
+```
 
-- **Run only login tests:**
-  ```bash
-  pytest tests/test_login.py -v
-  ```
+### Running Specific Test Modules
+Execute tests belonging to a specific feature area:
+```bash
+pytest tests/test_checkout.py -v
+pytest tests/test_login.py -v
+```
 
-- **Run checkout tests and show stdout:**
-  ```bash
-  pytest tests/test_checkout.py -v -s
-  ```
+### Running Specific Test Cases
+Execute a single test function by matching its name using the `-k` flag:
+```bash
+pytest -k "test_full_checkout_flow_completes" -v
+```
 
-- **Run a specific test by name:**
-  ```bash
-  pytest -k "test_full_checkout_flow_completes" -v
-  ```
+### Parallel Execution (Optional)
+Because the framework guarantees test isolation, you can drastically reduce execution time by running tests in parallel using `pytest-xdist`.
+```bash
+# Run tests across 4 parallel workers
+pytest -n 4 -v
+```
 
-- **Run in headed mode (visible browser window):**
-  *(By default, the framework runs in headless mode)*
-  ```bash
-  pytest --no-headless
-  ```
+---
 
 ## Test Reports
 
-After running the tests, a detailed HTML report will be generated in the `reports/` directory (`reports/report.html`). 
-If any test fails, a screenshot will automatically be captured and embedded directly into the HTML report for easy debugging.
+The framework utilizes `pytest-html` to generate comprehensive test reports. 
+- After a test run, open `reports/report.html` in your web browser.
+- **Automatic Failure Screenshots:** A custom Pytest hook in `conftest.py` is configured to automatically capture a full-page screenshot the moment a test fails. This screenshot is encoded as a base64 string and embedded directly into the HTML report, allowing for immediate visual debugging without relying on external file artifacts.
 
-## Key Design Decisions
+---
 
-- **JavaScript Clicks & React Event Setters:** Headless Chrome on Windows is known to occasionally drop standard WebDriver clicks and keystrokes, especially in React applications. To guarantee absolute stability, `base_page.py` utilizes `execute_script("arguments[0].click();")` for button interactions and dispatches native React synthetic `input` and `change` events when typing text.
-- **Function-Scoped Drivers:** The WebDriver fixture in `conftest.py` is deliberately scoped to `function`. This ensures a pristine browser state (clean cookies and local storage) for every test, eliminating state leakage and making the suite safe for parallel execution.
+## Continuous Integration
+
+This repository includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that automatically runs the entire test suite on every push and pull request to the `main` branch. 
+- The CI pipeline executes the tests on an `ubuntu-latest` runner using Headless Chrome.
+- Test reports and failure screenshots are automatically uploaded as pipeline artifacts for review.
